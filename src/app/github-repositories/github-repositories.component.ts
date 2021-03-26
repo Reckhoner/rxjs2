@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { of } from 'rxjs';
+import { of, Subject, Observable } from 'rxjs';
 import { RepositorySearchResponse } from '../shared/models/repository-search-response.interface';
+import { map, filter, distinctUntilChanged, switchMap, debounceTime } from 'rxjs/operators';
 
 const GITHUB_URL = 'http://api.github.com/search/repositories';
 
@@ -13,7 +13,7 @@ const GITHUB_URL = 'http://api.github.com/search/repositories';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GithubRepositoriesComponent implements OnInit {
-
+  queries$ = new Subject<string>(); 
   searchResult$: Observable<RepositorySearchResponse>
 
   constructor(private http: HttpClient) {
@@ -21,10 +21,18 @@ export class GithubRepositoriesComponent implements OnInit {
    }
 
   ngOnInit(): void {
+    this.searchResult$ = this.queries$.pipe(
+      map((query: string) => query ? query.trim() : ''),
+      filter<string>(Boolean),
+      debounceTime(500),
+      distinctUntilChanged<string>(),
+      switchMap((query: string) => this.fetchRepository(query))
+    );
   }
 
   onTextChange(query: string) {
-    this.searchResult$ = this.fetchRepository(query);
+    // this.searchResult$ = this.fetchRepository(query);
+    this.queries$.next(query);
   }
 
   private fetchRepository(query: string): Observable<RepositorySearchResponse> {
