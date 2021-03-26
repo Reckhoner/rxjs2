@@ -9,12 +9,14 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule} from '@angular/material/button';
 import { GithubRepositoriesComponent } from './github-repositories/github-repositories.component';
 import { HttpClientModule } from '@angular/common/http';
+import { EmployeesComponent } from './employees/employees.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    GithubRepositoriesComponent
+    GithubRepositoriesComponent,
+    EmployeesComponent
   ],
   imports: [
     BrowserModule,
